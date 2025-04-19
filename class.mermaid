@@ -104,6 +104,12 @@ direction TB
 	    ~~ +Map data
     }
 
+    class MessageTemplate {
+    }
+
+    class InvoiceMetadata {
+    }
+
     class FlowService {
 	    +FlowRepository repo
 	    +Flow createFlow(User, String)
@@ -132,6 +138,8 @@ direction TB
     }
 
 	<<abstract>> Integration
+	<<datatype>> MessageTemplate
+	<<datatype>> InvoiceMetadata
 
     Company "1" --> "*" User
     Company "1" --> "*" Flow
