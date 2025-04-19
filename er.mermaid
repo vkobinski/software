@@ -1,65 +1,71 @@
 erDiagram
   COMPANY {
-    ObjectId _id PK
+    ObjectId id PK
     string name
     string domain
-    object settings      
+    object settings
   }
-
   USER {
-    ObjectId _id PK
+    ObjectId id PK
     ObjectId companyId FK
     string name
     string email
-    date   createdAt
+    date createdAt
   }
-
   INTEGRATION {
-    ObjectId _id PK
+    ObjectId id PK
     ObjectId companyId FK
     string name
-    enum   type          
-    string webhookUrl     
-    object config         
-    bool   active
+    string type   
+    string webhookUrl
+    object config 
+    bool active
   }
-
   FLOW {
-    ObjectId _id PK
+    ObjectId id PK
     ObjectId companyId FK
-    ObjectId createdBy FK  
+    ObjectId createdBy FK
     string name
-    date   createdAt
-    bool   active
-    array nodes    
-    array edges     
+    date createdAt
+    bool active
   }
-
-  FLOW ||--|{ NODE_EMBED : contains
-  FLOW ||--|{ EDGE_EMBED : contains
-
-  TEST_RUN {
-    ObjectId _id PK
+  NODE {
+    string id PK
     ObjectId flowId FK
-    date   runAt
-    enum   status         
+    ObjectId integrationId FK
+    object config
+    int position
+  }
+  EDGE {
+    string id PK
+    string sourceNodeId FK
+    string targetNodeId FK
+  }
+  TEST_RUN {
+    ObjectId id PK
+    ObjectId flowId FK
+    date runAt
+    string status
     string log
   }
-
   EXECUTION_LOG {
-    ObjectId _id PK
+    ObjectId id PK
     ObjectId flowId FK
-    string nodeId        
-    date   executedAt
-    enum   status       
-    object payload       
-    object result       
+    string nodeId
+    date executedAt
+    string status  
+    object payload
+    object result
   }
 
-  COMPANY        ||--o{ USER          : "has"
-  COMPANY        ||--o{ INTEGRATION   : "offers"
-  COMPANY        ||--o{ FLOW          : "owns"
-  USER           ||--o{ FLOW          : "creates"
-  FLOW           ||--o{ TEST_RUN      : "tested_by"
-  FLOW           ||--o{ EXECUTION_LOG : "logs"
-  FLOW           ||--|{ INTEGRATION   : "via nodes[].integrationId"
+  COMPANY ||--o{ USER           : "1..*"
+  COMPANY ||--o{ INTEGRATION    : "1..*"
+  COMPANY ||--o{ FLOW           : "1..*"
+  USER    ||--o{ FLOW           : "0..*"
+  FLOW    ||--o{ NODE           : "1..*"
+  FLOW    ||--o{ TEST_RUN       : "0..*"
+  FLOW    ||--o{ EXECUTION_LOG  : "0..*"
+  NODE    }o--|| INTEGRATION    : "1"
+  NODE    }o--|| FLOW           : "1"
+  EDGE    }o--|| NODE           : "1" 
+  EDGE    }o--|| NODE           : "1" 
