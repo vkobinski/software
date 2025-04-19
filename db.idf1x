@@ -1,0 +1,65 @@
+Table company {
+  id ObjectId [pk]
+  name string
+  domain string
+  settings json
+}
+
+Table user {
+  id ObjectId [pk]
+  company_id ObjectId [ref: > company.id]
+  name string
+  email string
+  created_at datetime
+}
+
+Table integration {
+  id ObjectId [pk]
+  company_id ObjectId [ref: > company.id]
+  name string
+  type enum [note: 'BOT | HTTP | MESSAGE | NFE']
+  webhook_url string
+  config json
+  active boolean
+}
+
+Table flow {
+  id ObjectId [pk]
+  company_id ObjectId [ref: > company.id]
+  created_by ObjectId [ref: > user.id]
+  name string
+  created_at datetime
+  active boolean
+}
+
+Table node {
+  id string [pk]
+  flow_id ObjectId [ref: > flow.id]
+  integration_id ObjectId [ref: > integration.id]
+  config json
+  position int
+}
+
+Table edge {
+  id string [pk]
+  source_node_id string [ref: > node.id]
+  target_node_id string [ref: > node.id]
+}
+
+Table test_run {
+  id ObjectId [pk]
+  flow_id ObjectId [ref: > flow.id]
+  run_at datetime
+  status enum [note: 'SUCCESS | FAILURE']
+  log string
+}
+
+Table execution_log {
+  id ObjectId [pk]
+  flow_id ObjectId [ref: > flow.id]
+  node_id string [ref: > node.id]
+  executed_at datetime
+  status enum [note: 'SUCCESS | FAILURE']
+  payload json
+  result json
+}
