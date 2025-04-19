@@ -1,0 +1,76 @@
+erDiagram
+  COMPANY {
+    ObjectId id PK
+    string name
+    string domain
+    object settings { theme, limits, notifications }
+  }
+  USER {
+    ObjectId id PK
+    ObjectId companyId FK
+    string name
+    string email
+    date createdAt
+  }
+  INTEGRATION {
+    ObjectId id PK
+    ObjectId companyId FK
+    string name
+    enum type {"BOT","HTTP","MESSAGE","NFE"}
+    string webhookUrl
+    object config {
+      // BOT: sequence:Array<Action>
+      // HTTP: method, headers
+      // MESSAGE: channel, templateId
+      // NFE: token, invoiceMetadata
+    }
+    bool active
+  }
+  FLOW {
+    ObjectId id PK
+    ObjectId companyId FK
+    ObjectId createdBy FK
+    string name
+    date createdAt
+    bool active
+  }
+  NODE {
+    string id PK
+    ObjectId flowId FK
+    ObjectId integrationId FK
+    object config
+    int position
+  }
+  EDGE {
+    string id PK
+    string sourceNodeId FK
+    string targetNodeId FK
+  }
+  TEST_RUN {
+    ObjectId id PK
+    ObjectId flowId FK
+    date runAt
+    enum status {"SUCCESS","FAILURE"}
+    string log
+  }
+  EXECUTION_LOG {
+    ObjectId id PK
+    ObjectId flowId FK
+    string nodeId
+    date executedAt
+    enum status {"SUCCESS","FAILURE"}
+    object payload
+    object result
+  }
+
+  COMPANY ||--o{ USER           : "1..*"
+  COMPANY ||--o{ INTEGRATION    : "1..*"
+  COMPANY ||--o{ FLOW           : "1..*"
+  USER    ||--o{ FLOW           : "0..*"
+  FLOW    ||--o{ NODE           : "1..*"
+  FLOW    ||--o{ TEST_RUN       : "0..*"
+  FLOW    ||--o{ EXECUTION_LOG  : "0..*"
+  NODE    }o--|| INTEGRATION    : "1"
+  NODE    }o--|| FLOW           : "1"
+  EDGE    }o--|| NODE           : "1"  <-- source
+  EDGE    }o--|| NODE           : "1"  <-- target

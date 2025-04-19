@@ -1,0 +1,154 @@
+classDiagram
+direction TB
+    class Company {
+	    +ObjectId id
+	    +String name
+	    +String domain
+	    +List users
+	    +List flows
+    }
+
+    class User {
+	    +ObjectId id
+	    +String name
+	    +String email
+	    +Company company
+	    +List flows
+	    +void register()
+    }
+
+    class Flow {
+	    +ObjectId id
+	    +String name
+	    +Date createdAt
+	    +Boolean active
+	    +User createdBy
+	    +Company company
+	    +FlowGraph graph
+	    +List testRuns
+	    +List executionLogs
+	    +void activate()
+	    +TestRun runTest()
+	    +ExecutionLog execute(TransactionData data)
+    }
+
+    class FlowGraph {
+	    +List nodes
+	    +List edges
+	    +void addNode(Node)
+	    +void addEdge(Edge)
+    }
+
+    class Node {
+	    +String id
+	    +String label
+	    +Integration integration
+	    +Map config
+	    +void execute(TransactionData)
+    }
+
+    class Edge {
+	    +Node source
+	    +Node target
+    }
+
+    class Integration {
+	    +ObjectId id
+	    +String name
+	    +Company company
+	    +String webhookUrl
+	    +Map config
+	    +void configure(Map)
+	    +void activate()
+	    +abstract void execute(TransactionData)
+    }
+
+    class BotIntegration {
+	    +List sequence
+	    +void execute(TransactionData)
+    }
+
+    class HttpIntegration {
+	    +String httpMethod
+	    +void execute(TransactionData)
+    }
+
+    class MessageIntegration {
+	    +String channel
+	    +MessageTemplate template
+	    +void execute(TransactionData)
+    }
+
+    class NfeIntegration {
+	    +String token
+	    +InvoiceMetadata metadata
+	    +void execute(TransactionData)
+    }
+
+    class TestRun {
+	    +ObjectId id
+	    +Date runAt
+	    +RunStatus status
+	    +String log
+    }
+
+    class ExecutionLog {
+	    +ObjectId id
+	    +Date executedAt
+	    +ExecStatus status
+	    +TransactionData payload
+	    +Object result
+    }
+
+    class TransactionData {
+	    ~~ +Map data
+    }
+
+    class FlowService {
+	    +FlowRepository repo
+	    +Flow createFlow(User, String)
+	    +void saveFlow(Flow)
+	    +void deleteFlow(Flow)
+	    +void toggleFlow(Flow)
+    }
+
+    class IntegrationService {
+	    +IntegrationRepository repo
+	    +Integration createIntegration(String type, Map cfg)
+    }
+
+    class ExecutionEngine {
+	    +void executeFlow(Flow, TransactionData)
+    }
+
+    class FlowRepository {
+	    +Flow findById(ObjectId)
+	    +void save(Flow)
+    }
+
+    class IntegrationRepository {
+	    +Integration findById(ObjectId)
+	    +void save(Integration)
+    }
+
+	<<abstract>> Integration
+
+    Company "1" --> "*" User
+    Company "1" --> "*" Flow
+    Company "1" --> "*" Integration
+    User "1" --> "*" Flow
+    Flow "1" --> "1" FlowGraph
+    FlowGraph "1" --> "*" Node
+    FlowGraph "1" --> "*" Edge
+    Node "*" --> "1" Integration
+    Integration <|-- BotIntegration
+    Integration <|-- HttpIntegration
+    Integration <|-- MessageIntegration
+    Integration <|-- NfeIntegration
+    Flow "*" --> "*" TestRun
+    Flow "*" --> "*" ExecutionLog
+    FlowService ..> FlowRepository
+    IntegrationService ..> IntegrationRepository
+    ExecutionEngine ..> Flow
+    ExecutionEngine ..> Node
+
